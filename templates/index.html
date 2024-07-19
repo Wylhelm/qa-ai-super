@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Scenario Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 20px; }
+        .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="me-3" style="height: 50px;">
+            <div class="flex-grow-1 text-center">
+                <img src="{{ url_for('static', filename='images/appbanner.png') }}" alt="Test Scenario Generator" class="img-fluid" style="max-height: 80px;">
+            </div>
+            <div style="width: 50px;"></div> <!-- This empty div balances the layout -->
+        </div>
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <div class="d-flex flex-wrap">
+                    <button id="createScenarioBtn" class="btn btn-primary btn-sm me-2">Create New Scenario</button>
+                    <button id="editSystemPromptBtn" class="btn btn-secondary btn-sm me-2">Edit System Prompt</button>
+                    <button id="editScenarioPromptBtn" class="btn btn-secondary btn-sm me-2">Edit Scenario Prompt</button>
+                    <button id="editContextWindowBtn" class="btn btn-secondary btn-sm">Edit Context Window</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form id="scenarioForm">
+                    <div class="mb-3">
+                        <label for="scenarioName" class="form-label">Scenario Name</label>
+                        <input type="text" class="form-control" id="scenarioName" required disabled>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <label for="criteria" class="form-label">Criteria</label>
+                        <textarea class="form-control" id="criteria" rows="10" required disabled></textarea>
+                        <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Upload Document</label>
+                        <input type="file" class="form-control" id="fileUpload" disabled>
+                    </div>
+                    <button type="submit" class="btn btn-primary" disabled>Generate Scenario</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h2>Generated Scenario</h2>
+                <div id="generatedScenario" class="border p-3 mb-3" style="height: 500px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.825em;"></div>
+                <div id="inferenceStats" class="border p-2 mb-3" style="font-size: 0.9em; display: none;"></div>
+                <div>
+                    <button id="exportScenario" class="btn btn-secondary me-2" disabled>Export Scenario</button>
+                    <button id="stopGeneration" class="btn btn-danger" style="display: none;">Stop Generation</button>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2>Scenario History</h2>
+                    <button id="clearHistoryBtn" class="btn btn-danger btn-sm">Clear History</button>
+                </div>
+                <div id="scenarioHistory" class="scenario-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let scenarioCounter = 1;
+
+        // Function to toggle the visibility of the criteria placeholder
+        function toggleCriteriaPlaceholder() {
+            const criteria = document.getElementById('criteria');
+            const placeholder = document.getElementById('criteriaPlaceholder');
+            const isFormActive = !document.getElementById('scenarioName').disabled;
+            placeholder.style.display = (criteria.value.trim() === '' && !isFormActive) ? 'block' : 'none';
+        }
+
+        // Show placeholder by default
+        document.addEventListener('DOMContentLoaded', toggleCriteriaPlaceholder);
+
+        document.getElementById('createScenarioBtn').addEventListener('click', () => {
+            // Enable form elements
+            document.getElementById('scenarioName').disabled = false;
+            document.getElementById('criteria').disabled = false;
+            document.getElementById('fileUpload').disabled = false;
+            document.getElementById('scenarioForm').querySelector('button[type="submit"]').disabled = false;
+
+            // Reset form
+            document.getElementById('scenarioForm').reset();
+            
+            // Set a new default name for the scenario
+            document.getElementById('scenarioName').value = `Scenario ${scenarioCounter}`;
+            scenarioCounter++;
+            
+            // Clear the generated scenario
+            document.getElementById('generatedScenario').textContent = '';
+            document.getElementById('exportScenario').disabled = true;
+
+            // Hide the criteria placeholder
+            toggleCriteriaPlaceholder();
+
+            // Focus on the scenario name input
+            document.getElementById('scenarioName').focus();
+        });
+
+        // Add event listener to criteria textarea
+        document.getElementById('criteria').addEventListener('input', toggleCriteriaPlaceholder);
+
+        let abortController;
+
+        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('scenarioName').value;
+            const criteria = document.getElementById('criteria').value;
+            const generatedScenarioDiv = document.getElementById('generatedScenario');
+            const inferenceStatsDiv = document.getElementById('inferenceStats');
+            generatedScenarioDiv.textContent = '';
+            inferenceStatsDiv.style.display = 'none';
+            document.getElementById('exportScenario').disabled = true;
+            document.getElementById('stopGeneration').style.display = 'inline-block';
+
+            abortController = new AbortController();
+            const signal = abortController.signal;
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, criteria}),
+                    signal: signal
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value, { stream: true });
+                    
+                    if (chunk.startsWith('\n\nInference Statistics:')) {
+                        inferenceStatsDiv.textContent = chunk;
+                        inferenceStatsDiv.style.display = 'block';
+                    } else {
+                        generatedScenarioDiv.textContent += chunk;
+                        generatedScenarioDiv.scrollTop = generatedScenarioDiv.scrollHeight;
+                    }
+                }
+
+                const exportButton = document.getElementById('exportScenario');
+                exportButton.disabled = false;
+                exportButton.classList.remove('btn-secondary');
+                exportButton.classList.add('btn-success');
+                loadScenarios();
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    generatedScenarioDiv.textContent += '\n\nScenario generation stopped by user.';
+                } else {
+                    console.error('Fetch error:', error);
+                    generatedScenarioDiv.textContent += '\n\nAn error occurred during scenario generation.';
+                }
+            } finally {
+                document.getElementById('stopGeneration').style.display = 'none';
+            }
+        });
+
+        document.getElementById('stopGeneration').addEventListener('click', () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        });
+
+        document.getElementById('fileUpload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            document.getElementById('criteria').value += '\n' + data.content;
+        });
+
+        document.getElementById('exportScenario').addEventListener('click', () => {
+            const scenario = document.getElementById('generatedScenario').textContent;
+            const scenarioName = document.getElementById('scenarioName').value;
+            const blob = new Blob([scenario], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${scenarioName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_scenario.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        async function loadScenarios() {
+            const response = await fetch('/scenarios');
+            const scenarios = await response.json();
+            const historyDiv = document.getElementById('scenarioHistory');
+            historyDiv.innerHTML = '';
+            scenarios.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'mb-2 p-2 border rounded cursor-pointer';
+                div.innerHTML = `<strong>${s.name}</strong>: ${s.scenario.substring(0, 100)}...`;
+                div.addEventListener('click', () => {
+                    document.getElementById('scenarioName').value = s.name;
+                    document.getElementById('criteria').value = s.criteria;
+                    document.getElementById('generatedScenario').textContent = s.scenario;
+                    document.getElementById('exportScenario').disabled = false;
+                });
+                historyDiv.appendChild(div);
+            });
+        }
+
+        // Load scenarios when the page loads
+        document.addEventListener('DOMContentLoaded', loadScenarios);
+
+        // Load scenarios after generating a new scenario
+        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // ... existing code ...
+            await loadScenarios(); // Add this line to reload scenarios after generation
+        });
+
+        document.getElementById('editSystemPromptBtn').addEventListener('click', async () => {
+            const response = await fetch('/get_system_prompt');
+            const data = await response.json();
+            
+            // Create a modal dialog
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.left = '0';
+            modal.style.top = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+
+            // Create the modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.padding = '20px';
+            modalContent.style.borderRadius = '5px';
+            modalContent.style.width = '80%';
+            modalContent.style.maxWidth = '600px';
+
+            // Create a textarea for editing the prompt
+            const textarea = document.createElement('textarea');
+            textarea.value = data.prompt;
+            textarea.style.width = '100%';
+            textarea.style.height = '200px';
+            textarea.style.marginBottom = '10px';
+
+            // Create save and cancel buttons
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.className = 'btn btn-primary me-2';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'btn btn-secondary';
+
+            // Add elements to the modal
+            modalContent.appendChild(textarea);
+            modalContent.appendChild(saveBtn);
+            modalContent.appendChild(cancelBtn);
+            modal.appendChild(modalContent);
+
+            // Add the modal to the body
+            document.body.appendChild(modal);
+
+            // Handle save button click
+            saveBtn.addEventListener('click', async () => {
+                const newPrompt = textarea.value;
+                await fetch('/set_system_prompt', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({prompt: newPrompt})
+                });
+                document.body.removeChild(modal);
+                alert('System prompt updated successfully');
+            });
+
+            // Handle cancel button click
+            cancelBtn.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        });
+
+        document.getElementById('editContextWindowBtn').addEventListener('click', async () => {
+            const response = await fetch('/get_context_window');
+            const data = await response.json();
+            const currentSize = data.size;
+            
+            // Create a modal dialog
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.left = '0';
+            modal.style.top = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+
+            // Create the modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.padding = '20px';
+            modalContent.style.borderRadius = '5px';
+            modalContent.style.width = '80%';
+            modalContent.style.maxWidth = '600px';
+
+            // Create a select element for choosing the context window size
+            const select = document.createElement('select');
+            select.id = 'contextWindowSize';
+            select.style.width = '100%';
+            select.style.marginBottom = '10px';
+            select.innerHTML = `
+                <option value="4096" ${currentSize === 4096 ? 'selected' : ''}>4096</option>
+                <option value="8192" ${currentSize === 8192 ? 'selected' : ''}>8192</option>
+            `;
+
+            // Create save and cancel buttons
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.className = 'btn btn-primary me-2';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'btn btn-secondary';
+
+            // Add elements to the modal
+            modalContent.appendChild(select);
+            modalContent.appendChild(saveBtn);
+            modalContent.appendChild(cancelBtn);
+            modal.appendChild(modalContent);
+
+            // Add the modal to the body
+            document.body.appendChild(modal);
+
+            // Handle save button click
+            saveBtn.addEventListener('click', async () => {
+                const newSize = parseInt(select.value);
+                await fetch('/set_context_window', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({size: newSize})
+                });
+                document.body.removeChild(modal);
+                alert(`Context window size set to ${newSize}`);
+            });
+
+            // Handle cancel button click
+            cancelBtn.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        });
+
+        document.getElementById('editScenarioPromptBtn').addEventListener('click', async () => {
+            const response = await fetch('/get_scenario_prompt');
+            const data = await response.json();
+            
+            // Create a modal dialog
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.left = '0';
+            modal.style.top = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+
+            // Create the modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.backgroundColor = 'white';
+            modalContent.style.padding = '20px';
+            modalContent.style.borderRadius = '5px';
+            modalContent.style.width = '80%';
+            modalContent.style.maxWidth = '600px';
+
+            // Create a textarea for editing the scenario prompt
+            const textarea = document.createElement('textarea');
+            textarea.value = data.prompt;
+            textarea.style.width = '100%';
+            textarea.style.height = '200px';
+            textarea.style.marginBottom = '10px';
+
+            // Create save and cancel buttons
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.className = 'btn btn-primary me-2';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'btn btn-secondary';
+
+            // Add elements to the modal
+            modalContent.appendChild(textarea);
+            modalContent.appendChild(saveBtn);
+            modalContent.appendChild(cancelBtn);
+            modal.appendChild(modalContent);
+
+            // Add the modal to the body
+            document.body.appendChild(modal);
+
+            // Handle save button click
+            saveBtn.addEventListener('click', async () => {
+                const newPrompt = textarea.value;
+                await fetch('/set_scenario_prompt', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({prompt: newPrompt})
+                });
+                document.body.removeChild(modal);
+                showSaveAlert('Scenario prompt updated successfully');
+            });
+
+            // Handle cancel button click
+            cancelBtn.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        });
+
+        function showSaveAlert(message) {
+            alert(message || 'Changes saved successfully.');
+        }
+
+        document.getElementById('clearHistoryBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to clear all scenario history? This action cannot be undone.')) {
+                try {
+                    const response = await fetch('/clear_history', { method: 'POST' });
+                    if (response.ok) {
+                        document.getElementById('scenarioHistory').innerHTML = '';
+                        alert('Scenario history has been cleared.');
+                    } else {
+                        alert('Failed to clear scenario history. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error clearing history:', error);
+                    alert('An error occurred while clearing the history. Please try again.');
+                }
+            }
+        });
+    </script>
+    <script>
+        function toggleCriteriaPlaceholder() {
+            const criteria = document.getElementById('criteria');
+            const placeholder = document.getElementById('criteriaPlaceholder');
+            const isFormActive = !document.getElementById('scenarioName').disabled;
+            placeholder.style.display = (criteria.value.trim() === '' && !isFormActive) ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleCriteriaPlaceholder();
+            document.getElementById('criteria').addEventListener('input', toggleCriteriaPlaceholder);
+        });
+
+        document.getElementById('createScenarioBtn').addEventListener('click', () => {
+            // ... (existing code)
+
+            document.getElementById('scenarioForm').style.display = 'block';
+            document.getElementById('generatedScenario').textContent = '';
+            document.getElementById('exportScenario').disabled = true;
+            document.getElementById('criteria').value = '';
+            toggleCriteriaPlaceholder();
+        });
+
+        // Hide placeholder when form is submitted
+        document.getElementById('scenarioForm').addEventListener('submit', () => {
+            document.getElementById('criteriaPlaceholder').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
