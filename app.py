@@ -100,14 +100,16 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
+    if 'files' not in request.files:
         return jsonify({'error': 'No file part'})
-    file = request.files['file']
-    if file.filename == '':
+    files = request.files.getlist('files')
+    if not files or files[0].filename == '':
         return jsonify({'error': 'No selected file'})
-    if file:
+    contents = []
+    for file in files:
         content = process_file(file)
-        return jsonify({'content': content})
+        contents.append(content)
+    return jsonify({'content': contents})
 
 from flask import Response, stream_with_context
 

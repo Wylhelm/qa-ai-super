@@ -41,7 +41,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="fileUpload" class="form-label">Upload Document</label>
-                        <input type="file" class="form-control" id="fileUpload" disabled>
+                        <input type="file" class="form-control" id="fileUpload" multiple disabled>
                     </div>
                     <button type="submit" class="btn btn-primary" disabled>Generate Scenario</button>
                 </form>
@@ -175,15 +175,17 @@
         });
 
         document.getElementById('fileUpload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
+            const files = e.target.files;
             const formData = new FormData();
-            formData.append('file', file);
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
             });
             const data = await response.json();
-            document.getElementById('criteria').value += '\n' + data.content;
+            document.getElementById('criteria').value += '\n' + data.content.join('\n');
         });
 
         document.getElementById('exportScenario').addEventListener('click', () => {
