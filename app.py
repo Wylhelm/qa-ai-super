@@ -8,6 +8,11 @@ from PIL import Image
 import pytesseract
 import requests
 import json
+import base64
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scenarios.db'
@@ -65,7 +70,7 @@ def process_file(file):
             with open(filepath, 'r') as f:
                 return f.read()
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            return pytesseract.image_to_string(Image.open(filepath))
+            return analyze_image(filepath)
         else:
             return ''
     except Exception as e:
@@ -74,6 +79,46 @@ def process_file(file):
     finally:
         if os.path.exists(filepath):
             os.remove(filepath)
+
+def analyze_image(image_path):
+    with open(image_path, "rb") as image_file:
+        base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
+    }
+
+    payload = {
+        "model": "gpt-4-vision-preview",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Describe this image in detail, focusing on elements that might be relevant for software testing scenarios."
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 300
+    }
+
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response_data = response.json()
+
+    if response.status_code == 200:
+        return response_data['choices'][0]['message']['content']
+    else:
+        print(f"Error analyzing image: {response_data}")
+        return "Error analyzing image"
 
 def generate_scenario(criteria):
     global SYSTEM_PROMPT, CONTEXT_WINDOW_SIZE
