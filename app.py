@@ -14,6 +14,9 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
 
+# Add this line to print the API key (remove in production)
+print(f"API Key: {os.getenv('OPENAI_API_KEY')}")
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scenarios.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -84,9 +87,13 @@ def analyze_image(image_path):
     with open(image_path, "rb") as image_file:
         base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        return "Error: OpenAI API key not found in environment variables"
+    
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
+        "Authorization": f"Bearer {api_key}"
     }
 
     payload = {
