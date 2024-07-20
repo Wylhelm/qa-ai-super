@@ -1,11 +1,12 @@
 # Test Scenario Generator - User Guide
 
 ## Introduction
-The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It analyzes documents (Word, PDF, text files, and images) to generate scenarios that adhere to the IEEE 829 standard. This guide will walk you through the main features and how to use the application effectively.
+The Test Scenario Generator is an AI-powered web application designed to assist testers and QA professionals in creating comprehensive test scenarios. It analyzes documents (Word, PDF, text files, and images) to generate scenarios that adhere to the IEEE 829 standard, using a local Large Language Model (LLM) for AI capabilities. This guide will walk you through the main features and how to use the application effectively.
 
 ## Getting Started
-1. Open your web browser and navigate to the Test Scenario Generator application URL.
-2. You'll see the main interface with the CGI logo, input areas, buttons, and a scenario history section.
+1. Ensure the application is running and accessible (typically at http://localhost:5000).
+2. Open your web browser and navigate to the Test Scenario Generator application URL.
+3. You'll see the main interface with the CGI logo, input areas, buttons, and a scenario history section.
 
 ## Creating a New Scenario
 1. Click the "Create New Scenario" button at the top of the page.
@@ -18,25 +19,26 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 
 ## Uploading Files
 1. Click the "Upload Document" button.
-2. Select a file (supported formats: DOC, DOCX, PDF, TXT, PNG, JPG, JPEG).
-3. The application will analyze the file and extract relevant information.
+2. Select one or more files (supported formats: DOCX, PDF, TXT, PNG, JPG, JPEG).
+3. The application will analyze the file(s) and extract relevant information.
 4. Extracted information will be automatically added to the criteria text area.
-5. If any errors occur during file analysis, you'll see a warning message with details.
+5. Uploaded files will be listed below the upload button.
 
 ## Customizing Prompts and Context Window
-1. Click the "Edit System Prompt" button to edit the system prompt used for scenario generation.
-2. Click the "Edit Scenario Prompt" button to customize the scenario prompt template for generation.
+1. Click the "Edit System Prompt" button to modify the system instructions for the AI.
+2. Click the "Edit Scenario Prompt" button to customize the template for scenario generation.
 3. Click the "Edit Context Window" button to select the context window size (4096 or 8192 tokens).
 
 ## Generating a Test Scenario
-1. After entering criteria and uploading files, click the "Generate Scenario" button.
-2. The application will process your input using a local LLM server and generate a test scenario.
+1. After entering criteria and/or uploading files, click the "Generate Scenario" button.
+2. The application will process your input using the local LLM server to generate a test scenario.
 3. The generated scenario will appear in real-time in the large text area on the right side of the page.
 4. You can stop the generation at any time by clicking the "Stop Generation" button.
 5. The scenario will be automatically saved to the database and appear in the scenario history.
+6. Inference statistics will be displayed below the generated scenario.
 
 ## Exporting Scenarios
-1. After a scenario is generated, the "Export Scenario" button will turn green.
+1. After a scenario is generated, the "Export Scenario" button will become enabled.
 2. Click the "Export Scenario" button to download the generated scenario as a text file.
 
 ## Viewing Scenario History
@@ -47,6 +49,10 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 ## Clearing Scenario History
 1. To clear all scenario history, click the "Clear History" button at the top of the scenario history section.
 2. Confirm the action when prompted. Note that this action cannot be undone.
+
+## Regenerating Scenarios
+1. After generating a scenario, the "Generate Scenario" button will change to "Regenerate Scenario".
+2. Click this button to generate a new scenario based on the same criteria and settings.
 
 ## Tips for Best Results
 - Provide clear and specific criteria for more accurate scenario generation.
@@ -61,5 +67,6 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 - Verify that all required dependencies are properly installed and configured on the server.
 - Ensure that the local LLM server is running and accessible at http://localhost:1234.
 - If scenario generation seems stuck, try stopping and restarting the generation process.
+- If you encounter issues with the OpenAI API for image analysis, check your API key and quota.
 
 For technical issues or further assistance, please refer to the developer documentation or contact the development team.

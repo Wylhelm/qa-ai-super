@@ -8,4 +8,3 @@ Flask-SQLAlchemy==3.0.5
 python-dotenv==1.0.0
 Werkzeug==2.3.6
 SQLAlchemy==1.4.46
-python-dotenv==1.0.0
