@@ -35,7 +35,7 @@ SCENARIO_PROMPT = """Generate a test scenario based on the following criteria:
 
 Please provide a comprehensive test scenario that includes:
 
-1. Test Scenario ID and Name
+1. Ignore all filenames and add the Test Scenario ID and Name
 2. Test Case Objective
 3. Preconditions
 4. Test Steps (including inputs and expected results)
@@ -74,8 +74,7 @@ def process_file(file):
             with open(filepath, 'r') as f:
                 return f.read()
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            description = analyze_image(filepath)
-            return f"Image Analysis:\n{description}\n"
+            return analyze_image(filepath)
         else:
             return ''
     except Exception as e:
@@ -99,7 +98,7 @@ def analyze_image(image_path):
     }
 
     payload = {
-        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not set
+        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not setWhen
         "messages": [
             {
                 "role": "user",
@@ -117,7 +116,7 @@ def analyze_image(image_path):
                 ]
             }
         ],
-        "max_tokens": 1000  # Increased from 300 to 1000 for more detailed descriptions
+        "max_tokens": 300
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
