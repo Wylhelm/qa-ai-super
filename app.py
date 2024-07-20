@@ -74,7 +74,8 @@ def process_file(file):
             with open(filepath, 'r') as f:
                 return f.read()
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            return analyze_image(filepath)
+            description = analyze_image(filepath)
+            return f"Image Analysis:\n{description}\n"
         else:
             return ''
     except Exception as e:
@@ -116,7 +117,7 @@ def analyze_image(image_path):
                 ]
             }
         ],
-        "max_tokens": 300
+        "max_tokens": 1000  # Increased from 300 to 1000 for more detailed descriptions
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
