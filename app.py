@@ -10,6 +10,7 @@ import requests
 import json
 import base64
 import os
+import os
 from dotenv import load_dotenv
 
 load_dotenv()  # Load environment variables from .env file
@@ -97,7 +98,7 @@ def analyze_image(image_path):
     }
 
     payload = {
-        "model": "gpt-4o",
+        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not set
         "messages": [
             {
                 "role": "user",
