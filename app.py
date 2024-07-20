@@ -54,6 +54,8 @@ class TestScenario(db.Model):
     name = db.Column(db.String(100), nullable=False)
     criteria = db.Column(db.Text, nullable=False)
     scenario = db.Column(db.Text, nullable=False)
+    statistics = db.Column(db.Text)
+    uploaded_files = db.Column(db.Text)
 
 with app.app_context():
     db.create_all()
@@ -178,7 +180,9 @@ def generate():
             scenario += chunk
             yield chunk
 
-        new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario)
+        statistics = f"Input Tokens: {input_tokens}\nOutput Tokens: {output_tokens}\nGeneration Time: {generation_time:.2f} seconds"
+        uploaded_files = ", ".join(request.json.get('uploaded_files', []))
+        new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
         db.session.add(new_scenario)
         db.session.commit()
 
@@ -233,7 +237,7 @@ def generate_scenario_stream(criteria):
 @app.route('/scenarios', methods=['GET'])
 def get_scenarios():
     scenarios = TestScenario.query.all()
-    return jsonify([{'id': s.id, 'name': s.name, 'criteria': s.criteria, 'scenario': s.scenario} for s in scenarios])
+    return jsonify([{'id': s.id, 'name': s.name, 'criteria': s.criteria, 'scenario': s.scenario, 'statistics': s.statistics, 'uploaded_files': s.uploaded_files} for s in scenarios])
 
 @app.route('/get_system_prompt', methods=['GET'])
 def get_system_prompt():
