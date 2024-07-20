@@ -43,7 +43,11 @@
                         <label for="fileUpload" class="form-label">Upload Document</label>
                         <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
                     </div>
-                    <button type="submit" class="btn btn-primary" disabled>Generate Scenario</button>
+                    <div id="uploadedFilesList" class="mb-3">
+                        <h6>Uploaded Files:</h6>
+                        <ul id="fileList" class="list-group"></ul>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="generateButton" disabled>Generate Scenario</button>
                 </form>
             </div>
             <div class="col-md-6">
@@ -100,6 +104,9 @@
             document.getElementById('generatedScenario').textContent = '';
             document.getElementById('exportScenario').disabled = true;
 
+            // Clear the file list
+            document.getElementById('fileList').innerHTML = '';
+
             // Hide the criteria placeholder
             toggleCriteriaPlaceholder();
 
@@ -112,16 +119,18 @@
 
         let abortController;
 
-        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function generateScenario(isRegenerate = false) {
             const name = document.getElementById('scenarioName').value;
             const criteria = document.getElementById('criteria').value;
             const generatedScenarioDiv = document.getElementById('generatedScenario');
             const inferenceStatsDiv = document.getElementById('inferenceStats');
+            const generateButton = document.getElementById('generateButton');
+            
             generatedScenarioDiv.textContent = '';
             inferenceStatsDiv.style.display = 'none';
             document.getElementById('exportScenario').disabled = true;
             document.getElementById('stopGeneration').style.display = 'inline-block';
+            generateButton.disabled = true;
 
             abortController = new AbortController();
             const signal = abortController.signal;
@@ -155,7 +164,15 @@
                 exportButton.disabled = false;
                 exportButton.classList.remove('btn-secondary');
                 exportButton.classList.add('btn-success');
-                loadScenarios();
+                
+                generateButton.textContent = 'Regenerate Scenario';
+                generateButton.classList.remove('btn-primary');
+                generateButton.classList.add('btn-success');
+                generateButton.disabled = false;
+                
+                if (!isRegenerate) {
+                    loadScenarios();
+                }
             } catch (error) {
                 if (error.name === 'AbortError') {
                     generatedScenarioDiv.textContent += '\n\nScenario generation stopped by user.';
@@ -165,6 +182,18 @@
                 }
             } finally {
                 document.getElementById('stopGeneration').style.display = 'none';
+                generateButton.disabled = false;
+            }
+        }
+
+        document.getElementById('scenarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await generateScenario();
+        });
+
+        document.getElementById('generateButton').addEventListener('click', async () => {
+            if (document.getElementById('generateButton').textContent === 'Regenerate Scenario') {
+                await generateScenario(true);
             }
         });
 
@@ -177,15 +206,28 @@
         document.getElementById('fileUpload').addEventListener('change', async (e) => {
             const files = e.target.files;
             const formData = new FormData();
+            const fileList = document.getElementById('fileList');
+            
             for (let i = 0; i < files.length; i++) {
                 formData.append('files', files[i]);
+                // Add file to the list
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = files[i].name;
+                fileList.appendChild(li);
             }
+            
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
             });
             const data = await response.json();
-            document.getElementById('criteria').value += '\n' + data.content.join('\n');
+            const criteriaTextarea = document.getElementById('criteria');
+            for (let i = 0; i < files.length; i++) {
+                const fileName = files[i].name;
+                criteriaTextarea.value += `\n\nFile: ${fileName}\n`;
+                criteriaTextarea.value += data.content[i];
+            }
         });
 
         document.getElementById('exportScenario').addEventListener('click', () => {
