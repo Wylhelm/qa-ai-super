@@ -175,16 +175,17 @@ def generate():
     criteria = data.get('criteria')
 
     def generate_stream():
-        scenario, statistics = generate_scenario_stream(criteria)
-        for chunk in scenario:
+        scenario = ""
+        for chunk in generate_scenario_stream(criteria):
+            if chunk.startswith("\n\nInference Statistics:"):
+                statistics = chunk.split("\n\nInference Statistics:\n")[1]
+                uploaded_files = ", ".join(request.json.get('uploaded_files', []))
+                new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
+                db.session.add(new_scenario)
+                db.session.commit()
+            else:
+                scenario += chunk
             yield chunk
-
-        uploaded_files = ", ".join(request.json.get('uploaded_files', []))
-        new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
-        db.session.add(new_scenario)
-        db.session.commit()
-
-        yield f"\n\nInference Statistics:\n{statistics}"
 
     return Response(stream_with_context(generate_stream()), content_type='text/plain')
 
@@ -237,7 +238,7 @@ def generate_scenario_stream(criteria):
         generation_time = 0
     
     statistics = f"Input Tokens: {input_tokens}\nOutput Tokens: {output_tokens}\nGeneration Time: {generation_time:.2f} seconds"
-    return scenario, statistics
+    yield f"\n\nInference Statistics:\n{statistics}"
 
 @app.route('/scenarios', methods=['GET'])
 def get_scenarios():
