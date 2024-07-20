@@ -175,16 +175,16 @@ def generate():
     criteria = data.get('criteria')
 
     def generate_stream():
-        scenario = ""
-        for chunk in generate_scenario_stream(criteria):
-            scenario += chunk
+        scenario, statistics = generate_scenario_stream(criteria)
+        for chunk in scenario:
             yield chunk
 
-        statistics = f"Input Tokens: {input_tokens}\nOutput Tokens: {output_tokens}\nGeneration Time: {generation_time:.2f} seconds"
         uploaded_files = ", ".join(request.json.get('uploaded_files', []))
         new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
         db.session.add(new_scenario)
         db.session.commit()
+
+        yield f"\n\nInference Statistics:\n{statistics}"
 
     return Response(stream_with_context(generate_stream()), content_type='text/plain')
 
@@ -207,6 +207,7 @@ def generate_scenario_stream(criteria):
     start_time = time.time()
     input_tokens = len(SYSTEM_PROMPT.split()) + len(SCENARIO_PROMPT.format(criteria=criteria).split())
     output_tokens = 0
+    scenario = ""
     
     response = requests.post(url, headers=headers, json=data, stream=True)
     if response.status_code == 200:
@@ -222,6 +223,7 @@ def generate_scenario_stream(criteria):
                             if 'content' in delta:
                                 content = delta['content']
                                 output_tokens += len(content.split())
+                                scenario += content
                                 yield content
                 except json.JSONDecodeError:
                     print(f"Failed to parse JSON: {line_text}")
@@ -230,9 +232,12 @@ def generate_scenario_stream(criteria):
         
         end_time = time.time()
         generation_time = end_time - start_time
-        yield f"\n\nInference Statistics:\nInput Tokens: {input_tokens}\nOutput Tokens: {output_tokens}\nGeneration Time: {generation_time:.2f} seconds"
     else:
-        yield f"Error generating scenario: HTTP {response.status_code}"
+        scenario = f"Error generating scenario: HTTP {response.status_code}"
+        generation_time = 0
+    
+    statistics = f"Input Tokens: {input_tokens}\nOutput Tokens: {output_tokens}\nGeneration Time: {generation_time:.2f} seconds"
+    return scenario, statistics
 
 @app.route('/scenarios', methods=['GET'])
 def get_scenarios():
