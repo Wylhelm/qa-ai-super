@@ -151,7 +151,11 @@ def index():
         return render_template('index.html')
     except Exception as e:
         print(f"Error rendering index.html: {str(e)}")
-        return "Error rendering index.html", 500
+        return f"Error rendering index.html: {str(e)}", 500
+
+@app.route('/debug')
+def debug():
+    return "Debug route is working"
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
