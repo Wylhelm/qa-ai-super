@@ -219,26 +219,37 @@
             const files = e.target.files;
             const formData = new FormData();
             const fileList = document.getElementById('fileList');
-            
+            const criteriaTextarea = document.getElementById('criteria');
+    
             for (let i = 0; i < files.length; i++) {
                 formData.append('files', files[i]);
                 // Add file to the list
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
                 li.textContent = files[i].name;
+                if (files[i].type.startsWith('image/')) {
+                    li.textContent += ' (Analyzing image...)';
+                }
                 fileList.appendChild(li);
             }
-            
+    
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData
             });
             const data = await response.json();
-            const criteriaTextarea = document.getElementById('criteria');
-            data.results.forEach(result => {
-                criteriaTextarea.value += `\n\nFile: ${result.filename}\n`;
-                criteriaTextarea.value += result.content;
+    
+            // Update file list and criteria textarea
+            data.results.forEach((result, index) => {
+                const li = fileList.children[fileList.children.length - files.length + index];
+                if (li.textContent.includes('(Analyzing image...)')) {
+                    li.textContent = li.textContent.replace(' (Analyzing image...)', ' (Analysis complete)');
+                }
+                criteriaTextarea.value += `\n\nFile: ${result.filename}\n${result.content}`;
             });
+            criteriaTextarea.style.height = 'auto';
+            criteriaTextarea.style.height = (criteriaTextarea.scrollHeight + 5) + 'px';
+            criteriaTextarea.scrollTop = criteriaTextarea.scrollHeight;
             toggleCriteriaPlaceholder();
         });
 
