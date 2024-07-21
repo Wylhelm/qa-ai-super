@@ -107,7 +107,7 @@ def analyze_image(image_path):
             "messages": [
                 {
                     "role": "user",
-                    "content": f"Analyze the following text extracted from an image for software testing scenarios: {text}"
+                    "content": f"Provide a detailed description of the following text extracted from an image: {text}"
                 }
             ],
             "max_tokens": 1000  # Increase max tokens to capture more detailed responses
