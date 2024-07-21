@@ -91,15 +91,14 @@
             document.getElementById('scenarioName').disabled = false;
             document.getElementById('criteria').disabled = false;
             document.getElementById('fileUpload').disabled = false;
-            document.getElementById('scenarioForm').querySelector('button[type="submit"]').disabled = false;
 
             // Reset form
             document.getElementById('scenarioForm').reset();
-            
+    
             // Set a new default name for the scenario
             document.getElementById('scenarioName').value = `Scenario ${scenarioCounter}`;
             scenarioCounter++;
-            
+    
             // Clear the generated scenario
             document.getElementById('generatedScenario').textContent = '';
             document.getElementById('exportScenario').disabled = true;
@@ -112,6 +111,18 @@
 
             // Focus on the scenario name input
             document.getElementById('scenarioName').focus();
+
+            // Replace the generate button with a blue one
+            const generateButton = document.getElementById('generateButton');
+            generateButton.textContent = 'Generate Scenario';
+            generateButton.classList.remove('btn-success');
+            generateButton.classList.add('btn-primary');
+            generateButton.disabled = false;
+
+            // Clear the inference statistics
+            const inferenceStatsDiv = document.getElementById('inferenceStats');
+            inferenceStatsDiv.textContent = '';
+            inferenceStatsDiv.style.display = 'none';
         });
 
         // Add event listener to criteria textarea
@@ -122,6 +133,7 @@
         async function generateScenario(isRegenerate = false) {
             const name = document.getElementById('scenarioName').value;
             const criteria = document.getElementById('criteria').value;
+            const uploadedFiles = Array.from(document.getElementById('fileList').children).map(li => li.textContent);
             const generatedScenarioDiv = document.getElementById('generatedScenario');
             const inferenceStatsDiv = document.getElementById('inferenceStats');
             const generateButton = document.getElementById('generateButton');
@@ -139,7 +151,7 @@
                 const response = await fetch('/generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name, criteria}),
+                    body: JSON.stringify({name, criteria, uploaded_files: uploadedFiles}),
                     signal: signal
                 });
 
@@ -250,12 +262,20 @@
             scenarios.forEach(s => {
                 const div = document.createElement('div');
                 div.className = 'mb-2 p-2 border rounded cursor-pointer';
-                div.innerHTML = `<strong>${s.name}</strong>: ${s.scenario.substring(0, 100)}...`;
+                div.innerHTML = `
+                    <strong>${s.name}</strong>
+                    <p>${s.scenario.substring(0, 100)}...</p>
+                    <small>Files: ${s.uploaded_files || 'None'}</small><br>
+                    <small>${s.statistics || ''}</small>
+                `;
                 div.addEventListener('click', () => {
                     document.getElementById('scenarioName').value = s.name;
                     document.getElementById('criteria').value = s.criteria;
                     document.getElementById('generatedScenario').textContent = s.scenario;
                     document.getElementById('exportScenario').disabled = false;
+                    document.getElementById('inferenceStats').textContent = s.statistics || '';
+                    document.getElementById('inferenceStats').style.display = s.statistics ? 'block' : 'none';
+                    document.getElementById('fileList').innerHTML = s.uploaded_files ? s.uploaded_files.split(', ').map(file => `<li class="list-group-item">${file}</li>`).join('') : '';
                 });
                 historyDiv.appendChild(div);
             });
