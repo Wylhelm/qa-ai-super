@@ -146,53 +146,65 @@ def generate_scenario(criteria):
 
 @app.route('/')
 def index():
-    print("Rendering index.html")
-    return render_template('index.html')
+    try:
+        print("Rendering index.html")
+        return render_template('index.html')
+    except Exception as e:
+        print(f"Error rendering index.html: {str(e)}")
+        return "Error rendering index.html", 500
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("Upload endpoint hit")
-    if 'files' not in request.files:
-        return jsonify({'error': 'No file part'})
-    files = request.files.getlist('files')
-    if not files or files[0].filename == '':
-        return jsonify({'error': 'No selected file'})
-    results = []
-    for file in files:
-        result = process_file(file)
-        results.append(result)
-    return jsonify({'results': results})
+    try:
+        print("Upload endpoint hit")
+        if 'files' not in request.files:
+            return jsonify({'error': 'No file part'})
+        files = request.files.getlist('files')
+        if not files or files[0].filename == '':
+            return jsonify({'error': 'No selected file'})
+        results = []
+        for file in files:
+            result = process_file(file)
+            results.append(result)
+        return jsonify({'results': results})
+    except Exception as e:
+        print(f"Error in upload_file: {str(e)}")
+        return jsonify({'error': 'File upload failed'}), 500
 
 from flask import Response, stream_with_context
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    print("Generate endpoint hit")
-    data = request.json
-    name = data.get('name')
-    criteria = data.get('criteria')
+    try:
+        print("Generate endpoint hit")
+        data = request.json
+        name = data.get('name')
+        criteria = data.get('criteria')
 
-    def generate_stream():
-        scenario = ""
-        for chunk in generate_scenario_stream(criteria):
-            if chunk.startswith("\n\nInference Statistics:"):
-                statistics = chunk.split("\n\nInference Statistics:\n")[1]
-                uploaded_files = ", ".join(request.json.get('uploaded_files', []))
-                existing_scenario = TestScenario.query.filter_by(name=name).first()
-                if existing_scenario:
-                    existing_scenario.criteria = criteria
-                    existing_scenario.scenario = scenario
-                    existing_scenario.statistics = statistics
-                    existing_scenario.uploaded_files = uploaded_files
+        def generate_stream():
+            scenario = ""
+            for chunk in generate_scenario_stream(criteria):
+                if chunk.startswith("\n\nInference Statistics:"):
+                    statistics = chunk.split("\n\nInference Statistics:\n")[1]
+                    uploaded_files = ", ".join(request.json.get('uploaded_files', []))
+                    existing_scenario = TestScenario.query.filter_by(name=name).first()
+                    if existing_scenario:
+                        existing_scenario.criteria = criteria
+                        existing_scenario.scenario = scenario
+                        existing_scenario.statistics = statistics
+                        existing_scenario.uploaded_files = uploaded_files
+                    else:
+                        new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
+                        db.session.add(new_scenario)
+                    db.session.commit()
                 else:
-                    new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
-                    db.session.add(new_scenario)
-                db.session.commit()
-            else:
-                scenario += chunk
-            yield chunk
+                    scenario += chunk
+                yield chunk
 
-    return Response(stream_with_context(generate_stream()), content_type='text/plain')
+        return Response(stream_with_context(generate_stream()), content_type='text/plain')
+    except Exception as e:
+        print(f"Error in generate: {str(e)}")
+        return "Error generating scenario", 500
 
 import time
 
