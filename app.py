@@ -198,17 +198,12 @@ def generate():
                 yield chunk
     
             uploaded_files = ", ".join(request.json.get('uploaded_files', []))
-            if is_regenerate:
-                name = f"{name} (Regenerated)"
-                existing_scenario = TestScenario.query.filter_by(name=name).first()
-                if existing_scenario:
-                    existing_scenario.criteria = criteria
-                    existing_scenario.scenario = scenario
-                    existing_scenario.statistics = statistics
-                    existing_scenario.uploaded_files = uploaded_files
-                else:
-                    new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
-                    db.session.add(new_scenario)
+            existing_scenario = TestScenario.query.filter_by(name=name).first()
+            if existing_scenario:
+                existing_scenario.criteria = criteria
+                existing_scenario.scenario = scenario
+                existing_scenario.statistics = statistics
+                existing_scenario.uploaded_files = uploaded_files
             else:
                 new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
                 db.session.add(new_scenario)
