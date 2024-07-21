@@ -118,9 +118,13 @@
             document.getElementById('scenarioName').value = `Scenario ${scenarioCounter}`;
             scenarioCounter++;
     
-            // Clear the generated scenario
+            // Clear the generated scenario and reset the generate button
+            const generateButton = document.getElementById('generateButton');
             document.getElementById('generatedScenario').textContent = '';
             document.getElementById('exportScenario').disabled = true;
+            generateButton.textContent = 'Generate Scenario';
+            generateButton.classList.remove('btn-success');
+            generateButton.classList.add('btn-primary');
 
             // Clear the file list
             document.getElementById('fileList').innerHTML = '';
