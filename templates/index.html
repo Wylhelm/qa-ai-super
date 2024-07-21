@@ -6,9 +6,26 @@
     <title>Test Scenario Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { padding-top: 20px; }
+        body { 
+            padding-top: 20px;
+            background-color: white;
+            color: black;
+        }
         .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
-        #criteria { height: 200px; resize: vertical; }
+        #criteria { height: 200px; resize: vertical; overflow-y: auto; }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .btn-primary {
+            background-color: #ED0210;
+            border-color: #ED0210;
+        }
+        .btn-primary:hover {
+            background-color: #780664;
+            border-color: #780664;
+        }
     </style>
 </head>
 <body>
@@ -23,7 +40,7 @@
         <div class="row">
             <div class="col-md-12 mb-3">
                 <div class="d-flex flex-wrap">
-                    <button id="createScenarioBtn" class="btn btn-primary btn-sm me-2">Create New Scenario</button>
+                    <button id="createScenarioBtn" class="btn btn-primary btn-sm me-2" style="background-color: #007bff; border-color: #007bff;">Create New Scenario</button>
                     <button id="editSystemPromptBtn" class="btn btn-secondary btn-sm me-2">Edit System Prompt</button>
                     <button id="editScenarioPromptBtn" class="btn btn-secondary btn-sm me-2">Edit Scenario Prompt</button>
                     <button id="editContextWindowBtn" class="btn btn-secondary btn-sm">Edit Context Window</button>
@@ -37,7 +54,7 @@
                     </div>
                     <div class="mb-3 position-relative">
                         <label for="criteria" class="form-label">Criteria</label>
-                        <textarea class="form-control" id="criteria" rows="10" required disabled></textarea>
+                        <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
                         <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario</div>
                     </div>
                     <div class="mb-3">
@@ -48,7 +65,7 @@
                         <h6>Uploaded Files:</h6>
                         <ul id="fileList" class="list-group"></ul>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="generateButton" disabled>Generate Scenario</button>
+                    <button type="submit" class="btn btn-success" id="generateButton" disabled>Generate Scenario</button>
                 </form>
             </div>
             <div class="col-md-6">
@@ -92,6 +109,7 @@
             document.getElementById('scenarioName').disabled = false;
             document.getElementById('criteria').disabled = false;
             document.getElementById('fileUpload').disabled = false;
+            updateGenerateButton();
 
             // Reset form
             document.getElementById('scenarioForm').reset();
@@ -113,12 +131,8 @@
             // Focus on the scenario name input
             document.getElementById('scenarioName').focus();
 
-            // Replace the generate button with a blue one
-            const generateButton = document.getElementById('generateButton');
-            generateButton.textContent = 'Generate Scenario';
-            generateButton.classList.remove('btn-success');
-            generateButton.classList.add('btn-primary');
-            generateButton.disabled = false;
+            // Update the generate button state
+            updateGenerateButton();
 
             // Clear the inference statistics
             const inferenceStatsDiv = document.getElementById('inferenceStats');
@@ -127,7 +141,31 @@
         });
 
         // Add event listener to criteria textarea
-        document.getElementById('criteria').addEventListener('input', toggleCriteriaPlaceholder);
+        document.getElementById('criteria').addEventListener('input', function() {
+            toggleCriteriaPlaceholder();
+            updateGenerateButton();
+        });
+
+        function updateGenerateButton() {
+            const generateButton = document.getElementById('generateButton');
+            const criteria = document.getElementById('criteria').value.trim();
+            
+            if (criteria === '') {
+                generateButton.disabled = true;
+                generateButton.classList.remove('btn-success');
+                generateButton.classList.add('btn-secondary');
+            } else {
+                generateButton.disabled = false;
+                generateButton.classList.remove('btn-secondary');
+                generateButton.classList.add('btn-success');
+            }
+        }
+
+        // Call updateGenerateButton initially to set the correct state
+        updateGenerateButton();
+
+        // Add event listener to criteria textarea
+        document.getElementById('criteria').addEventListener('input', updateGenerateButton);
 
         let abortController;
 
@@ -159,18 +197,22 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
 
+                let fullContent = '';
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
                     const chunk = decoder.decode(value, { stream: true });
-                    
-                    if (chunk.startsWith('\n\nInference Statistics:')) {
-                        inferenceStatsDiv.textContent = chunk;
+                    fullContent += chunk;
+                
+                    if (fullContent.includes('\n\nInference Statistics:')) {
+                        const [scenarioContent, stats] = fullContent.split('\n\nInference Statistics:');
+                        generatedScenarioDiv.textContent = scenarioContent;
+                        inferenceStatsDiv.textContent = 'Inference Statistics:\n' + stats;
                         inferenceStatsDiv.style.display = 'block';
                     } else {
-                        generatedScenarioDiv.textContent += chunk;
-                        generatedScenarioDiv.scrollTop = generatedScenarioDiv.scrollHeight;
+                        generatedScenarioDiv.textContent = fullContent;
                     }
+                    generatedScenarioDiv.scrollTop = generatedScenarioDiv.scrollHeight;
                 }
 
                 const exportButton = document.getElementById('exportScenario');
@@ -241,15 +283,24 @@
             const data = await response.json();
     
             // Update file list and criteria textarea
+            let newContent = criteriaTextarea.value;
             data.results.forEach((result, index) => {
                 const li = fileList.children[fileList.children.length - files.length + index];
                 if (li.textContent.includes('(Analyzing image...)')) {
                     li.textContent = li.textContent.replace(' (Analyzing image...)', ' (Analysis complete)');
                 }
-                criteriaTextarea.value += `\n\nFile: ${result.filename}\n${result.content}`;
+                newContent += `\n\nFile: ${result.filename}\n${result.content}`;
             });
+            criteriaTextarea.value = newContent.trim(); // Remove leading/trailing whitespace
+            
+            // Adjust textarea height to fit content
+            // Remove auto-expand functionality
+            
+            // Ensure the full text is visible
             criteriaTextarea.scrollTop = criteriaTextarea.scrollHeight;
+            
             toggleCriteriaPlaceholder();
+            updateGenerateButton();
         });
 
         document.getElementById('exportScenario').addEventListener('click', () => {
