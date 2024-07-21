@@ -184,6 +184,7 @@ def generate():
         data = request.json
         name = data.get('name')
         criteria = data.get('criteria')
+        is_regenerate = data.get('is_regenerate', False)
 
         def generate_stream():
             scenario = ""
@@ -191,15 +192,10 @@ def generate():
                 if chunk.startswith("\n\nInference Statistics:"):
                     statistics = chunk.split("\n\nInference Statistics:\n")[1]
                     uploaded_files = ", ".join(request.json.get('uploaded_files', []))
-                    existing_scenario = TestScenario.query.filter_by(name=name).first()
-                    if existing_scenario:
-                        existing_scenario.criteria = criteria
-                        existing_scenario.scenario = scenario
-                        existing_scenario.statistics = statistics
-                        existing_scenario.uploaded_files = uploaded_files
-                    else:
-                        new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
-                        db.session.add(new_scenario)
+                    if is_regenerate:
+                        name = f"{name} (Regenerated)"
+                    new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
+                    db.session.add(new_scenario)
                     db.session.commit()
                 else:
                     scenario += chunk
