@@ -8,6 +8,7 @@
     <style>
         body { padding-top: 20px; }
         .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
+        #criteria { height: 200px; resize: vertical; }
     </style>
 </head>
 <body>
@@ -247,8 +248,6 @@
                 }
                 criteriaTextarea.value += `\n\nFile: ${result.filename}\n${result.content}`;
             });
-            criteriaTextarea.style.height = 'auto';
-            criteriaTextarea.style.height = (criteriaTextarea.scrollHeight + 5) + 'px';
             criteriaTextarea.scrollTop = criteriaTextarea.scrollHeight;
             toggleCriteriaPlaceholder();
         });
