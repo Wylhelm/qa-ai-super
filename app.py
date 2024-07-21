@@ -106,7 +106,7 @@ def analyze_image(image_path):
         "messages": [
             {
                 "role": "user",
-                "content": f"Describe this image in detail, focusing on elements that might be relevant for software testing scenarios. Image: data:image/jpeg;base64,{base64_image}"
+                "content": f"Describe this image in detail, focusing on elements that might be relevant for software testing scenarios. Here is the base64 encoded image data: {base64_image}"
             }
         ],
         "max_tokens": 1000  # Increase max tokens to capture more detailed responses
