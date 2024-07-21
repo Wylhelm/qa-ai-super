@@ -188,18 +188,20 @@ def generate():
 
         def generate_stream():
             scenario = ""
+            statistics = ""
             for chunk in generate_scenario_stream(criteria):
                 if chunk.startswith("\n\nInference Statistics:"):
                     statistics = chunk.split("\n\nInference Statistics:\n")[1]
-                    uploaded_files = ", ".join(request.json.get('uploaded_files', []))
-                    if is_regenerate:
-                        name = f"{name} (Regenerated)"
-                    new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
-                    db.session.add(new_scenario)
-                    db.session.commit()
                 else:
                     scenario += chunk
                 yield chunk
+    
+            uploaded_files = ", ".join(request.json.get('uploaded_files', []))
+            if is_regenerate:
+                name = f"{name} (Regenerated)"
+            new_scenario = TestScenario(name=name, criteria=criteria, scenario=scenario, statistics=statistics, uploaded_files=uploaded_files)
+            db.session.add(new_scenario)
+            db.session.commit()
 
         return Response(stream_with_context(generate_stream()), content_type='text/plain')
     except Exception as e:
