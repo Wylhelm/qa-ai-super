@@ -102,25 +102,14 @@ def analyze_image(image_path):
     }
 
     payload = {
-        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not setWhen
+        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not set
         "messages": [
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "Describe this image in detail, focusing on elements that might be relevant for software testing scenarios."
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
+                "content": f"Describe this image in detail, focusing on elements that might be relevant for software testing scenarios. Image: data:image/jpeg;base64,{base64_image}"
             }
         ],
-        "max_tokens": 300
+        "max_tokens": 1000  # Increase max tokens to capture more detailed responses
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
