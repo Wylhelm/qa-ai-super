@@ -197,7 +197,7 @@
                 const response = await fetch('/generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({name, criteria, uploaded_files: uploadedFiles}),
+                    body: JSON.stringify({name, criteria, uploaded_files: uploadedFiles, is_regenerate: isRegenerate}),
                     signal: signal
                 });
 
