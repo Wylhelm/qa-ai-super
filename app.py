@@ -67,21 +67,23 @@ def process_file(file):
         file.save(filepath)
 
         if filename.endswith('.docx'):
-            return docx2txt.process(filepath)
+            content = docx2txt.process(filepath)
         elif filename.endswith('.pdf'):
             with open(filepath, 'rb') as f:
                 reader = PyPDF2.PdfReader(f)
-                return ' '.join([page.extract_text() for page in reader.pages])
+                content = ' '.join([page.extract_text() for page in reader.pages])
         elif filename.endswith('.txt'):
             with open(filepath, 'r') as f:
-                return f.read()
+                content = f.read()
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            return analyze_image(filepath)
+            content = analyze_image(filepath)
         else:
-            return ''
+            content = ''
+
+        return {'filename': filename, 'content': content}
     except Exception as e:
         print(f"Error processing file: {str(e)}")
-        return ''
+        return {'filename': filename, 'content': ''}
     finally:
         if os.path.exists(filepath):
             os.remove(filepath)
@@ -160,11 +162,11 @@ def upload_file():
     files = request.files.getlist('files')
     if not files or files[0].filename == '':
         return jsonify({'error': 'No selected file'})
-    contents = []
+    results = []
     for file in files:
-        content = process_file(file)
-        contents.append(content)
-    return jsonify({'content': contents})
+        result = process_file(file)
+        results.append(result)
+    return jsonify({'results': results})
 
 from flask import Response, stream_with_context
 
