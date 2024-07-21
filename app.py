@@ -146,10 +146,12 @@ def generate_scenario(criteria):
 
 @app.route('/')
 def index():
+    print("Rendering index.html")
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    print("Upload endpoint hit")
     if 'files' not in request.files:
         return jsonify({'error': 'No file part'})
     files = request.files.getlist('files')
@@ -165,6 +167,7 @@ from flask import Response, stream_with_context
 
 @app.route('/generate', methods=['POST'])
 def generate():
+    print("Generate endpoint hit")
     data = request.json
     name = data.get('name')
     criteria = data.get('criteria')
