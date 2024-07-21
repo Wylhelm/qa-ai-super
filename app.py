@@ -187,6 +187,7 @@ def generate():
         is_regenerate = data.get('is_regenerate', False)
 
         def generate_stream():
+            nonlocal name
             scenario = ""
             statistics = ""
             for chunk in generate_scenario_stream(criteria):
