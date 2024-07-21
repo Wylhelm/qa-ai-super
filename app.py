@@ -89,37 +89,41 @@ def process_file(file):
             os.remove(filepath)
 
 def analyze_image(image_path):
-    with open(image_path, "rb") as image_file:
-        base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+    try:
+        image = Image.open(image_path)
+        text = pytesseract.image_to_string(image)
 
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        return "Error: OpenAI API key not found in environment variables"
-    
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            return "Error: OpenAI API key not found in environment variables"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
 
-    payload = {
-        "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not set
-        "messages": [
-            {
-                "role": "user",
-                "content": f"Analyze the following base64 encoded image data for software testing scenarios: {base64_image}"
-            }
-        ],
-        "max_tokens": 1000  # Increase max tokens to capture more detailed responses
-    }
+        payload = {
+            "model": os.getenv('OPENAI_MODEL', 'gpt-4o'),  # Use the model from .env, fallback to gpt-4o if not set
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"Analyze the following text extracted from an image for software testing scenarios: {text}"
+                }
+            ],
+            "max_tokens": 1000  # Increase max tokens to capture more detailed responses
+        }
 
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    response_data = response.json()
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+        response_data = response.json()
 
-    if response.status_code == 200:
-        return response_data['choices'][0]['message']['content']
-    else:
-        print(f"Error analyzing image: {response_data}")
-        return "Error analyzing image"
+        if response.status_code == 200:
+            return response_data['choices'][0]['message']['content']
+        else:
+            print(f"Error analyzing image: {response_data}")
+            return "Error analyzing image"
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        return "Error processing image"
 
 def generate_scenario(criteria):
     global SYSTEM_PROMPT, CONTEXT_WINDOW_SIZE
