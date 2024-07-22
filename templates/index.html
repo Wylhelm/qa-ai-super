@@ -256,6 +256,7 @@
         document.getElementById('generateButton').addEventListener('click', async () => {
             if (document.getElementById('generateButton').textContent === 'Regenerate Scenario') {
                 await generateScenario(true);
+                await loadScenarios(); // Reload scenarios after regeneration
             }
         });
 
