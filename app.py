@@ -10,15 +10,20 @@ import requests
 import json
 import base64
 import os
-import os
+import logging
 from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 load_dotenv()  # Load environment variables from .env file
 
 # Add this line to print the API key (remove in production)
-print(f"API Key: {os.getenv('OPENAI_API_KEY')}")
+logger.info(f"API Key: {os.getenv('OPENAI_API_KEY')}")
 
 app = Flask(__name__)
+logger.info("Flask app initialized")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scenarios.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
@@ -147,10 +152,10 @@ def generate_scenario(criteria):
 @app.route('/')
 def index():
     try:
-        print("Attempting to render index.html")
+        logger.info("Attempting to render index.html")
         return render_template('index.html')
     except Exception as e:
-        print(f"Error rendering index.html: {str(e)}")
+        logger.error(f"Error rendering index.html: {str(e)}", exc_info=True)
         return f"Error rendering index.html: {str(e)}", 500
 
 @app.route('/debug')
@@ -316,4 +321,6 @@ def clear_history():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
+    logger.info("Starting the Flask application")
     app.run(debug=True)
+    logger.info("Flask application has stopped")
