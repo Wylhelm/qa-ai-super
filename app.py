@@ -14,7 +14,7 @@ import logging
 from dotenv import load_dotenv
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logger = logging.getLogger(__name__)
 
 load_dotenv()  # Load environment variables from .env file
@@ -153,7 +153,7 @@ def generate_scenario(criteria):
 def index():
     try:
         logger.info("Attempting to render index.html")
-        return render_template('index.html')
+        return render_template('index.html', scenario_name='', scenario_description='', scenario_statistics='')
     except Exception as e:
         logger.error(f"Error rendering index.html: {str(e)}", exc_info=True)
         return f"Error rendering index.html: {str(e)}", 500
