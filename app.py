@@ -199,8 +199,10 @@ def generate():
         is_regenerate = data.get('is_regenerate', False)
 
         if is_regenerate:
-            if "(Regenerated)" not in name:
+            if not name.endswith("(Regenerated)"):
                 name = f"{name} (Regenerated)"
+            else:
+                name = name.replace(" (Regenerated) (Regenerated)", " (Regenerated)")
 
         def generate_stream():
             nonlocal name
