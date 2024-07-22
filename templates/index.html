@@ -300,6 +300,9 @@
             });
             criteriaTextarea.value = newContent.trim(); // Remove leading/trailing whitespace
             
+            // Trigger input event to update placeholder and generate button
+            criteriaTextarea.dispatchEvent(new Event('input'));
+            
             // Adjust textarea height to fit content
             // Remove auto-expand functionality
             
