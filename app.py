@@ -22,8 +22,8 @@ load_dotenv()  # Load environment variables from .env file
 # Add this line to print the API key (remove in production)
 logger.info(f"API Key: {os.getenv('OPENAI_API_KEY')}")
 
-app = Flask(__name__)
-logger.info("Flask app initialized")
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+logger.info("Flask app initialized with static folder")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scenarios.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
@@ -156,6 +156,7 @@ def index():
         logger.debug(f"Current working directory: {os.getcwd()}")
         logger.debug(f"Template folder: {app.template_folder}")
         logger.debug(f"Static folder: {app.static_folder}")
+        print("Rendering index.html")  # Add this line
         return render_template('index.html', scenario_name='', scenario_description='', scenario_statistics='')
     except Exception as e:
         logger.error(f"Error rendering index.html: {str(e)}", exc_info=True)
