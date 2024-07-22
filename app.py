@@ -62,8 +62,11 @@ class TestScenario(db.Model):
     statistics = db.Column(db.Text)
     uploaded_files = db.Column(db.Text)
 
-with app.app_context():
-    db.create_all()
+def init_db():
+    with app.app_context():
+        db.create_all()
+
+init_db()
 
 def process_file(file):
     try:
@@ -275,8 +278,11 @@ def generate_scenario_stream(criteria):
 
 @app.route('/scenarios', methods=['GET'])
 def get_scenarios():
-    scenarios = TestScenario.query.all()
-    return jsonify([{'id': s.id, 'name': s.name, 'criteria': s.criteria, 'scenario': s.scenario, 'statistics': s.statistics, 'uploaded_files': s.uploaded_files} for s in scenarios])
+    if db.engine.has_table('test_scenario'):
+        scenarios = TestScenario.query.all()
+        return jsonify([{'id': s.id, 'name': s.name, 'criteria': s.criteria, 'scenario': s.scenario, 'statistics': s.statistics, 'uploaded_files': s.uploaded_files} for s in scenarios])
+    else:
+        return jsonify([])  # Return an empty list if the table doesn't exist
 
 @app.route('/get_system_prompt', methods=['GET'])
 def get_system_prompt():
