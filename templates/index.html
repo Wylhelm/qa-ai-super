@@ -348,6 +348,20 @@
                     document.getElementById('inferenceStats').textContent = s.statistics || '';
                     document.getElementById('inferenceStats').style.display = s.statistics ? 'block' : 'none';
                     document.getElementById('fileList').innerHTML = s.uploaded_files ? s.uploaded_files.split(', ').map(file => `<li class="list-group-item">${file}</li>`).join('') : '';
+                    
+                    // Enable form elements
+                    document.getElementById('scenarioName').disabled = false;
+                    document.getElementById('criteria').disabled = false;
+                    document.getElementById('fileUpload').disabled = false;
+                    
+                    // Update generate button
+                    const generateButton = document.getElementById('generateButton');
+                    generateButton.textContent = 'Regenerate Scenario';
+                    generateButton.classList.remove('btn-primary');
+                    generateButton.classList.add('btn-success');
+                    generateButton.disabled = false;
+                    
+                    updateGenerateButton();
                 });
                 historyDiv.appendChild(div);
             });
