@@ -199,7 +199,7 @@ def generate():
         is_regenerate = data.get('is_regenerate', False)
 
         if is_regenerate:
-            if not name.endswith("(Regenerated)"):
+            if "(Regenerated)" not in name:
                 name = f"{name} (Regenerated)"
 
         def generate_stream():
