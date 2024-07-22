@@ -195,7 +195,7 @@ def generate():
         criteria = data.get('criteria')
         is_regenerate = data.get('is_regenerate', False)
 
-        if is_regenerate:
+        if is_regenerate and not name.endswith("(Regenerated)"):
             name = f"{name} (Regenerated)"
         is_regenerate = data.get('is_regenerate', False)
 
