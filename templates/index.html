@@ -58,7 +58,7 @@
                     <div class="mb-3 position-relative">
                         <label for="criteria" class="form-label">Criteria</label>
                         <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
-                        <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario</div>
+                        <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario or select one from History</div>
                     </div>
                     <div class="mb-3">
                         <label for="fileUpload" class="form-label">Upload Document</label>
@@ -360,6 +360,9 @@
                     generateButton.classList.remove('btn-primary');
                     generateButton.classList.add('btn-success');
                     generateButton.disabled = false;
+                    
+                    // Hide the criteria placeholder
+                    document.getElementById('criteriaPlaceholder').style.display = 'none';
                     
                     updateGenerateButton();
                 });
