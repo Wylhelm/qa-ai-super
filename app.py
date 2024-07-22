@@ -195,6 +195,10 @@ def generate():
         criteria = data.get('criteria')
         is_regenerate = data.get('is_regenerate', False)
 
+        if is_regenerate:
+            name = f"{name} (Regenerated)"
+        is_regenerate = data.get('is_regenerate', False)
+
         def generate_stream():
             nonlocal name
             scenario = ""
