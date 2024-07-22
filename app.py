@@ -200,10 +200,8 @@ def generate():
         is_regenerate = data.get('is_regenerate', False)
 
         if is_regenerate:
-            if "(Regenerated)" not in name:
-                name = f"{name} (Regenerated)"
-            else:
-                name = re.sub(r'\s*\(Regenerated\)(\s*\(Regenerated\))*', ' (Regenerated)', name)
+            name = re.sub(r'\s*\(Regenerated\)*$', '', name)  # Remove any existing "(Regenerated)" at the end
+            name = f"{name} (Regenerated)"
 
         def generate_stream():
             nonlocal name
