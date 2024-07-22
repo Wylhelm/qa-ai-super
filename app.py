@@ -147,11 +147,15 @@ def generate_scenario(criteria):
 @app.route('/')
 def index():
     try:
-        print("Rendering index.html")
+        print("Attempting to render index.html")
         return render_template('index.html')
     except Exception as e:
         print(f"Error rendering index.html: {str(e)}")
         return f"Error rendering index.html: {str(e)}", 500
+
+@app.route('/debug')
+def debug():
+    return "Debug route is working"
 
 @app.route('/debug')
 def debug():
