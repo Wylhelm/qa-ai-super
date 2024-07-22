@@ -157,10 +157,6 @@ def index():
 def debug():
     return "Debug route is working"
 
-@app.route('/debug')
-def debug():
-    return "Debug route is working"
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
