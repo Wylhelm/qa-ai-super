@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
+import re
 import docx2txt
 import PyPDF2
 from PIL import Image
@@ -199,10 +200,10 @@ def generate():
         is_regenerate = data.get('is_regenerate', False)
 
         if is_regenerate:
-            if not name.endswith("(Regenerated)"):
+            if "(Regenerated)" not in name:
                 name = f"{name} (Regenerated)"
             else:
-                name = name.replace(" (Regenerated) (Regenerated)", " (Regenerated)")
+                name = re.sub(r'\s*\(Regenerated\)(\s*\(Regenerated\))*', ' (Regenerated)', name)
 
         def generate_stream():
             nonlocal name
