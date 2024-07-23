@@ -70,7 +70,7 @@
                     <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-3" style="max-height: 100px; cursor: pointer;" id="isaacLogo">
                     <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid" style="max-height: 100px;">
                 </div>
-                <h4 class="mb-3">Upload document</h4>
+                <h3 class="mb-3">Upload document</h3>
                 <div class="mb-3">
                     <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                 </div>
@@ -94,11 +94,11 @@
                 </div>
                 <form id="scenarioForm">
                     <div class="mb-3">
-                        <label for="scenarioName" class="form-label">Scénario name</label>
+                        <label for="scenarioName" class="form-label h3">Scenario name</label>
                         <input type="text" class="form-control" id="scenarioName" required disabled>
                     </div>
                     <div class="mb-3 position-relative">
-                        <h4 class="mb-2">Criterias</h4>
+                        <h3 class="mb-2">Criterias</h3>
                         <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
                         <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario or select one from History</div>
                     </div>
