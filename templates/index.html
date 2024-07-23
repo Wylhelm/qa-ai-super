@@ -16,6 +16,12 @@
         }
         .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
         #criteria { height: 200px; resize: vertical; overflow-y: auto; }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
         .container-fluid {
             background-color: white;
             border-radius: 10px;
@@ -38,12 +44,10 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12 text-center mb-4">
-                <img src="{{ url_for('static', filename='images/isaac_logo_new.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
-            </div>
-        </div>
-        <div class="row">
             <div class="col-md-4">
+                <div class="d-flex align-items-center mb-4">
+                    <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
+                </div>
                 <h5>Upload document</h5>
                 <div class="mb-3">
                     <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
