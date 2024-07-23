@@ -22,7 +22,7 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
 1. Ensure Python 3.7+ is installed on your system.
 2. Clone this repository:
    ```
-   git clone https://github.com/your-repo/test-scenario-generator.git
+   git clone https://github.com/Wylhelm/qa-ai-super.git
    ```
 3. Navigate to the project directory:
    ```
