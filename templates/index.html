@@ -70,13 +70,20 @@
                     <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-3" style="max-height: 100px; cursor: pointer;" id="isaacLogo">
                     <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid" style="max-height: 100px;">
                 </div>
-                <h3 class="mb-3 form-label">Upload document</h3>
-                <div class="mb-3">
-                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
+                <div id="uploadSection" class="mb-3" style="opacity: 0.5;">
+                    <h3 class="mb-3 form-label">Upload document</h3>
+                    <div class="mb-3">
+                        <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
+                    </div>
+                    <div id="uploadedFilesList" class="mb-3">
+                        <h6>Documents list</h6>
+                        <ul id="fileList" class="list-group"></ul>
+                    </div>
                 </div>
-                <div id="uploadedFilesList" class="mb-3">
-                    <h6>Documents list</h6>
-                    <ul id="fileList" class="list-group"></ul>
+                <div class="mb-3">
+                    <h6>History</h6>
+                    <div id="scenarioHistory" class="scenario-history"></div>
+                    <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">Clear History</button>
                 </div>
                 <div class="mb-3">
                     <h6>History</h6>
@@ -138,7 +145,8 @@
             // Enable form elements
             document.getElementById('scenarioName').disabled = false;
             document.getElementById('criteria').disabled = false;
-            document.getElementById('file').disabled = false;
+            document.getElementById('fileUpload').disabled = false;
+            document.getElementById('uploadSection').style.opacity = '1';
             updateGenerateButton();
 
             // Reset form
