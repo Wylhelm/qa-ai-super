@@ -11,23 +11,27 @@
     <style>
         body { 
             padding-top: 20px;
-            background-color: white;
-            color: black;
+            background-color: #f8f9fa;
+            color: #333;
         }
         .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
         #criteria { height: 200px; resize: vertical; overflow-y: auto; }
-        .container {
+        .container-fluid {
             background-color: white;
             border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .btn-primary {
-            background-color: #28a745; /* Green color */
-            border-color: #28a745;
+            background-color: #007bff;
+            border-color: #007bff;
         }
         .btn-primary:hover {
-            background-color: #218838; /* Darker green on hover */
-            border-color: #1e7e34;
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .form-control, .btn {
+            border-radius: 0;
         }
     </style>
 </head>
@@ -35,13 +39,13 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12 text-center mb-4">
-                <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
+                <img src="{{ url_for('static', filename='images/isaac_logo_new.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
             </div>
         </div>
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
+                <h5>Upload document</h5>
                 <div class="mb-3">
-                    <label for="fileUpload" class="form-label">Upload document</label>
                     <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
                 </div>
                 <div id="uploadedFilesList" class="mb-3">
@@ -54,8 +58,8 @@
                     <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">Clear History</button>
                 </div>
             </div>
-            <div class="col-md-9">
-                <div class="mb-3 d-flex justify-content-between">
+            <div class="col-md-8">
+                <div class="mb-3">
                     <button id="createScenarioBtn" class="btn btn-primary">Create New Scenario</button>
                     <button id="editSystemPromptBtn" class="btn btn-secondary">Edit System Prompt</button>
                     <button id="editScenarioPromptBtn" class="btn btn-secondary">Edit Scenario Prompt</button>
