@@ -13,6 +13,24 @@
             padding-top: 20px;
             background-color: #f8f9fa;
             color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #333;
+            color: #f8f9fa;
+        }
+        .dark-mode .container-fluid {
+            background-color: #444;
+            color: #f8f9fa;
+        }
+        .dark-mode .form-control {
+            background-color: #555;
+            color: #f8f9fa;
+            border-color: #777;
+        }
+        .dark-mode .btn-secondary {
+            background-color: #666;
+            border-color: #777;
         }
         .scenario-history { max-height: 300px; overflow-y: auto; font-size: 0.9em; }
         #criteria { height: 200px; resize: vertical; overflow-y: auto; }
@@ -72,6 +90,7 @@
                     <button id="editSystemPromptBtn" class="btn btn-secondary">Edit System Prompt</button>
                     <button id="editScenarioPromptBtn" class="btn btn-secondary">Edit Scenario Prompt</button>
                     <button id="editContextWindowBtn" class="btn btn-secondary">Edit Context Window</button>
+                    <button id="darkModeToggle" class="btn btn-success float-end">Dark Mode</button>
                 </div>
                 <form id="scenarioForm">
                     <div class="mb-3">
@@ -647,6 +666,20 @@
             videoWindow.document.write('</video>');
             videoWindow.document.write('</body></html>');
             videoWindow.document.close();
+        });
+    </script>
+    <script>
+        document.getElementById('darkModeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                this.textContent = 'Light Mode';
+                this.classList.remove('btn-success');
+                this.classList.add('btn-light');
+            } else {
+                this.textContent = 'Dark Mode';
+                this.classList.remove('btn-light');
+                this.classList.add('btn-success');
+            }
         });
     </script>
 </body>
