@@ -72,7 +72,7 @@
                 </div>
                 <h6 class="mb-3">Upload document</h6>
                 <div class="mb-3">
-                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
+                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
                 </div>
                 <div id="uploadedFilesList" class="mb-3">
                     <h6>Documents list</h6>
@@ -138,6 +138,7 @@
             document.getElementById('criteria').disabled = false;
             document.getElementById('fileUpload').disabled = false;
             updateGenerateButton();
+            document.getElementById('fileUpload').disabled = false;
 
             // Reset form
             document.getElementById('scenarioForm').reset();
