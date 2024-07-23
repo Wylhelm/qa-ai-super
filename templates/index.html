@@ -70,20 +70,13 @@
                     <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-3" style="max-height: 100px; cursor: pointer;" id="isaacLogo">
                     <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid" style="max-height: 100px;">
                 </div>
-                <div id="uploadSection" class="mb-3" style="opacity: 0.5;">
-                    <h3 class="mb-3 form-label">Upload document</h3>
-                    <div class="mb-3">
-                        <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
-                    </div>
-                    <div id="uploadedFilesList" class="mb-3">
-                        <h6>Documents list</h6>
-                        <ul id="fileList" class="list-group"></ul>
-                    </div>
-                </div>
+                <h4 class="mb-3">Upload document</h4>
                 <div class="mb-3">
-                    <h6>History</h6>
-                    <div id="scenarioHistory" class="scenario-history"></div>
-                    <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">Clear History</button>
+                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
+                </div>
+                <div id="uploadedFilesList" class="mb-3">
+                    <h6>Documents list</h6>
+                    <ul id="fileList" class="list-group"></ul>
                 </div>
                 <div class="mb-3">
                     <h6>History</h6>
@@ -101,11 +94,11 @@
                 </div>
                 <form id="scenarioForm">
                     <div class="mb-3">
-                        <label for="scenarioName" class="form-label">Scenario name</label>
+                        <label for="scenarioName" class="form-label">Scénario name</label>
                         <input type="text" class="form-control" id="scenarioName" required disabled>
                     </div>
                     <div class="mb-3 position-relative">
-                        <label for="criteria" class="form-label">Criterias</label>
+                        <h4 class="mb-2">Criterias</h4>
                         <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
                         <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario or select one from History</div>
                     </div>
@@ -127,7 +120,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let scenarioCounter = 1;
-        let isNewScenario = false;
 
         // Function to toggle the visibility of the criteria placeholder
         function toggleCriteriaPlaceholder() {
@@ -141,12 +133,10 @@
         document.addEventListener('DOMContentLoaded', toggleCriteriaPlaceholder);
 
         document.getElementById('createScenarioBtn').addEventListener('click', () => {
-            isNewScenario = true;
             // Enable form elements
             document.getElementById('scenarioName').disabled = false;
             document.getElementById('criteria').disabled = false;
             document.getElementById('fileUpload').disabled = false;
-            document.getElementById('uploadSection').style.opacity = '1';
             updateGenerateButton();
 
             // Reset form
@@ -301,13 +291,7 @@
             }
         });
 
-        document.getElementById('file').addEventListener('change', async (e) => {
-            if (!isNewScenario) {
-                alert('Please click "Create New Scenario" before uploading a file.');
-                e.target.value = ''; // Clear the file input
-                return;
-            }
-
+        document.getElementById('fileUpload').addEventListener('change', async (e) => {
             const files = e.target.files;
             const formData = new FormData();
             const fileList = document.getElementById('fileList');
