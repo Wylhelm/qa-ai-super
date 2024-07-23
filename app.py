@@ -25,6 +25,8 @@ logger.info(f"API Key: {os.getenv('OPENAI_API_KEY')}")
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 logger.info("Flask app initialized with static folder")
+logger.info(f"Static folder path: {app.static_folder}")
+logger.info(f"Static URL path: {app.static_url_path}")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scenarios.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 db = SQLAlchemy(app)
@@ -160,7 +162,8 @@ def index():
         logger.debug(f"Current working directory: {os.getcwd()}")
         logger.debug(f"Template folder: {app.template_folder}")
         logger.debug(f"Static folder: {app.static_folder}")
-        print("Rendering index.html")  # Add this line
+        logger.debug(f"Index.html exists: {os.path.exists(os.path.join(app.template_folder, 'index.html'))}")
+        print("Rendering index.html")
         return render_template('index.html', scenario_name='', scenario_description='', scenario_statistics='')
     except Exception as e:
         logger.error(f"Error rendering index.html: {str(e)}", exc_info=True)
@@ -339,3 +342,6 @@ if __name__ == '__main__':
     logger.info("Starting the Flask application")
     app.run(debug=True)
     logger.info("Flask application has stopped")
+@app.route('/debug')
+def debug():
+    return "Debug route is working"
