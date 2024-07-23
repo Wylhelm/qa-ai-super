@@ -26,7 +26,7 @@ The Test Scenario Generator is an AI-powered web application designed to assist 
    ```
 3. Navigate to the project directory:
    ```
-   cd test-scenario-generator
+   cd qa-ai-super
    ```
 4. Install the required dependencies:
    ```
