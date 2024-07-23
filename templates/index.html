@@ -32,62 +32,56 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="me-3" style="height: 50px;">
-            <div class="flex-grow-1 text-center">
-                <img src="{{ url_for('static', filename='images/appbanner.png') }}" alt="Test Scenario Generator" class="img-fluid" style="max-height: 80px;">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
             </div>
-            <div style="width: 50px;"></div> <!-- This empty div balances the layout -->
         </div>
         <div class="row">
-            <div class="col-md-12 mb-3">
-                <div class="d-flex flex-wrap">
-                    <button id="createScenarioBtn" class="btn btn-primary btn-sm me-2" style="background-color: #007bff; border-color: #007bff;">Create New Scenario</button>
-                    <button id="editSystemPromptBtn" class="btn btn-secondary btn-sm me-2">Edit System Prompt</button>
-                    <button id="editScenarioPromptBtn" class="btn btn-secondary btn-sm me-2">Edit Scenario Prompt</button>
-                    <button id="editContextWindowBtn" class="btn btn-secondary btn-sm">Edit Context Window</button>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label for="fileUpload" class="form-label">Upload document</label>
+                    <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg">
+                </div>
+                <div id="uploadedFilesList" class="mb-3">
+                    <h6>Documents list</h6>
+                    <ul id="fileList" class="list-group"></ul>
+                </div>
+                <div class="mb-3">
+                    <h6>History</h6>
+                    <div id="scenarioHistory" class="scenario-history"></div>
+                    <button id="clearHistoryBtn" class="btn btn-danger btn-sm mt-2">Clear History</button>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-9">
+                <div class="mb-3 d-flex justify-content-between">
+                    <button id="createScenarioBtn" class="btn btn-primary">Create New Scenario</button>
+                    <button id="editSystemPromptBtn" class="btn btn-secondary">Edit System Prompt</button>
+                    <button id="editScenarioPromptBtn" class="btn btn-secondary">Edit Scenario Prompt</button>
+                    <button id="editContextWindowBtn" class="btn btn-secondary">Edit Context Window</button>
+                </div>
                 <form id="scenarioForm">
                     <div class="mb-3">
-                        <label for="scenarioName" class="form-label">Scenario Name</label>
+                        <label for="scenarioName" class="form-label">Scénario name</label>
                         <input type="text" class="form-control" id="scenarioName" required disabled>
                     </div>
                     <div class="mb-3 position-relative">
-                        <label for="criteria" class="form-label">Criteria</label>
+                        <label for="criteria" class="form-label">Criterias</label>
                         <textarea class="form-control" id="criteria" rows="10" required disabled style="resize: vertical;"></textarea>
                         <div id="criteriaPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted">To begin, click on Create New Scenario or select one from History</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="fileUpload" class="form-label">Upload Document</label>
-                        <input type="file" class="form-control" id="fileUpload" multiple accept=".docx,.pdf,.txt,.png,.jpg,.jpeg" disabled>
-                    </div>
-                    <div id="uploadedFilesList" class="mb-3">
-                        <h6>Uploaded Files:</h6>
-                        <ul id="fileList" class="list-group"></ul>
-                    </div>
                     <button type="submit" class="btn btn-success" id="generateButton" disabled>Generate Scenario</button>
                 </form>
-            </div>
-            <div class="col-md-6">
-                <h2>Generated Scenario</h2>
-                <div id="generatedScenario" class="border p-3 mb-3" style="height: 500px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.825em;"></div>
-                <div id="inferenceStats" class="border p-2 mb-3" style="font-size: 0.9em; display: none;"></div>
-                <div>
-                    <button id="exportScenario" class="btn btn-secondary me-2" disabled>Export Scenario</button>
-                    <button id="stopGeneration" class="btn btn-danger" style="display: none;">Stop Generation</button>
+                <div class="mt-4">
+                    <h2>Generated scenario</h2>
+                    <div id="generatedScenario" class="border p-3 mb-3" style="height: 300px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.825em;"></div>
+                    <div id="inferenceStats" class="border p-2 mb-3" style="font-size: 0.9em; display: none;"></div>
+                    <div>
+                        <button id="exportScenario" class="btn btn-secondary me-2" disabled>Export Scenario</button>
+                        <button id="stopGeneration" class="btn btn-danger" style="display: none;">Stop Generation</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h2>Scenario History</h2>
-                    <button id="clearHistoryBtn" class="btn btn-danger btn-sm">Clear History</button>
-                </div>
-                <div id="scenarioHistory" class="scenario-history"></div>
             </div>
         </div>
     </div>
