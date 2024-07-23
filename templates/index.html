@@ -46,7 +46,8 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="d-flex align-items-center mb-4">
-                    <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid" style="max-height: 100px;">
+                    <img src="{{ url_for('static', filename='images/logoIsaaC3.png') }}" alt="ISAAC Logo" class="img-fluid me-3" style="max-height: 100px; cursor: pointer;" id="isaacLogo">
+                    <img src="{{ url_for('static', filename='images/cgi.jpeg') }}" alt="CGI Logo" class="img-fluid" style="max-height: 100px;">
                 </div>
                 <h5>Upload document</h5>
                 <div class="mb-3">
@@ -82,7 +83,7 @@
                     <button type="submit" class="btn btn-success" id="generateButton" disabled>Generate Scenario</button>
                 </form>
                 <div class="mt-4">
-                    <h2>Generated scenario</h2>
+                    <label for="generatedScenario" class="form-label">Generated scenario</label>
                     <div id="generatedScenario" class="border p-3 mb-3" style="height: 300px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.825em;"></div>
                     <div id="inferenceStats" class="border p-2 mb-3" style="font-size: 0.9em; display: none;"></div>
                     <div>
@@ -631,6 +632,18 @@
         // Hide placeholder when form is submitted
         document.getElementById('scenarioForm').addEventListener('submit', () => {
             document.getElementById('criteriaPlaceholder').style.display = 'none';
+        });
+    </script>
+    <script>
+        document.getElementById('isaacLogo').addEventListener('click', function() {
+            var videoWindow = window.open('', 'ISAAC Video', 'width=800,height=600');
+            videoWindow.document.write('<html><body style="margin:0; padding:0;">');
+            videoWindow.document.write('<video width="100%" height="100%" controls autoplay>');
+            videoWindow.document.write('<source src="{{ url_for("static", filename="images/isaacvideo.mp4") }}" type="video/mp4">');
+            videoWindow.document.write('Your browser does not support the video tag.');
+            videoWindow.document.write('</video>');
+            videoWindow.document.write('</body></html>');
+            videoWindow.document.close();
         });
     </script>
 </body>
