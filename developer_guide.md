@@ -104,6 +104,7 @@ The application uses the following environment variables:
 ## Future Improvements
 - Implement user authentication and multi-user support.
 - Add support for more file formats and AI models.
+- Add the possibility to be integrated to other applications (ex:Jira).
 - Enhance the UI with more interactive features and real-time updates.
 - Implement a plugin system for easy extension of file processing capabilities.
 - Add a feature to compare and merge multiple scenarios.
@@ -113,19 +114,5 @@ The application uses the following environment variables:
 - Implement a feature to save and load custom prompt templates.
 - Add pagination for scenario history to improve performance with large datasets.
 - Enhance the filtering and sorting system for scenarios with more options and better performance.
-
-For any questions or contributions, please contact the project maintainers.
-- Add support for more file formats and AI models.
-- Enhance the UI with more interactive features and real-time updates.
-- Implement a plugin system for easy extension of file processing capabilities.
-- Add a feature to compare and merge multiple scenarios.
-- Implement automated testing for both backend and frontend components.
-- Improve error handling and user feedback for LLM server connection issues.
-- Add support for different LLM providers and models.
-- Implement a feature to save and load custom prompt templates.
-- Add pagination for scenario history to improve performance with large datasets.
-- Enhance the filtering and sorting system for scenarios with more options and better performance.
-- Implement a progress indicator for scenario generation.
-- Add a feature to edit and regenerate parts of a scenario.
 
 For any questions or contributions, please contact the project maintainers.
